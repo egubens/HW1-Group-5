@@ -1,0 +1,142 @@
+---
+title: "Multiple Linear Regression"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Overview
+
+
+$Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_n x_n... + error$
+
+``` {r, include=T}
+library(readr)
+
+expenses<-read_csv("C:/Users/Erick Gutierrez/Documents/GitHub/HW1-Group-5/expenses.csv",
+    col_types = cols(
+     age = col_double(),
+     sex = col_factor(),
+     bmi = col_double(),
+     children = col_integer(),
+     smoker = col_factor(),
+     region = col_factor(),
+     charges = col_double()
+     ))
+head(expenses)
+```
+
+# Exploratory Data Analysis
+
+1. Checking distribution of target variable
+
+```{r warning=F, message=F}
+library(ggplot2)
+
+ggplot(data=expenses, aes(expenses$charges))+
+  geom_histogram(aes(y=..density..), fill="blue")+
+  geom_density()
+
+```
+
+
+2. Analyzing Summary Statistics
+
+```{r warning=FALSE, message=F}
+library(psych)
+psych::describe(expenses)
+
+```
+
+3. Checking Outliers Using Boxplots
+
+```{r}
+
+par(mfrow = c(2, 2))
+
+boxplot(expenses$charges,
+        main="Medical Charges",
+        ylab="Dollars ($)",
+        col="lightblue")
+
+boxplot(expenses$bmi,
+        main="Body Mass Index",
+        ylab="Body Mass Index",
+        col="lightblue")
+
+boxplot(expenses$age,
+        main="Individuals age",
+        ylab="Years",
+        col="lightblue")
+
+boxplot(expenses$children,
+        main="Number of Children",
+        ylab="Children",
+        col="lightblue")
+
+par(mfrow = c(1, 1)) 
+```
+
+4. Correlation Matrix Visualization
+```{r warning=F}
+library(corrgram)
+require(corrgram)
+corrgram(expenses, order=TRUE, main="Correlation Matrix of Numeric Variables", diag.panel= panel.density, upper.panel=panel.cor, lower.panel=panel.fill)
+mtext("Pearson's Correlation Coefficients", side=4, cex=1.2, line = -1.5, outer=T, xpd=NA)
+```
+
+
+# Training Regression Model
+
+## Driving data into train and test subsets
+
+```{r warning=F, message=F}
+library(caret)
+index<-createDataPartition(expenses$charges, p=0.7, list=F)
+train<-expenses[index,]
+test<-expenses[-index,]
+
+dim(train)
+
+```
+
+## Building Model
+
+
+```{r}
+
+lmModel<-lm(charges~., data=train)
+print(lmModel)
+
+```
+
+## Interpreting Regression Coefficients
+
+
+## Validating Regression Coefficients and Models
+
+
+```{r}
+summary(lmModel)
+
+
+```
+
+
+1. Multiple R-squared:
+
+2. Adjusted R-squared:
+
+3. F-statistic:
+
+4. AIC and BIC values:
+```{r}
+AIC(lmModel)
+BIC(lmModel)
+```
+5. Root Mean Square Error:
+
+```{r warning=FALSE, message=F}
+library(Metrics)
+rmse(actual = train$charges, predicted = lmModel$fitted.values)
+```
